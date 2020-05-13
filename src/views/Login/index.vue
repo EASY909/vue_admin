@@ -1,36 +1,170 @@
 <!--  -->
 <template>
   <div class="login">
-      登录
+    <div class="login-wrap">
+      <ul class="menu-tab">
+        <li
+          @click="togglemenu(item)"
+          :class="{current:item.current}"
+          v-for="(item,index) in menuTab"
+          :key="index"
+        >{{item.txt}}</li>
+      </ul>
 
-      <el-row>
-  <el-button disabled>默认按钮</el-button>
-  <el-button type="primary" disabled>主要按钮</el-button>
-  <el-button type="success" disabled>成功按钮</el-button>
-  <el-button type="info" disabled>信息按钮</el-button>
-  <el-button type="warning" disabled>警告按钮</el-button>
-  <el-button type="danger" disabled>危险按钮</el-button>
-</el-row>
+      <el-form :model="ruleForm" class="login-form" status-icon :rules="rules" ref="ruleForm">
+        <el-form-item prop="username" class="item-form">
+          <label for>邮箱</label>
+          <el-input type="text" v-model="ruleForm.username" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item prop="password" class="item-form">
+          <label for>密码</label>
+          <el-input
+            type="password"
+            v-model="ruleForm.password"
+            autocomplete="off"
+            minlength="6"
+            maxlength="20"
+          ></el-input>
+        </el-form-item>
+        <el-form-item prop="passwords" class="item-form" v-show="model=='register'">
+          <label for>重复密码</label>
+          <el-input
+            type="password"
+            v-model="ruleForm.passwords"
+            autocomplete="off"
+            minlength="6"
+            maxlength="20"
+          ></el-input>
+        </el-form-item>
+        <el-form-item prop="code" class="item-form">
+          <label for>验证码</label>
+          <el-row :gutter="10">
+            <el-col :span="15">
+              <el-input v-model="ruleForm.code"></el-input>
+            </el-col>
+            <el-col :span="9">
+              <el-button type="success" class="block">获取验证码</el-button>
+            </el-col>
+          </el-row>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="danger" @click="submitForm('ruleForm')" class="login-btn block">登录</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
   </div>
 </template>
 
 <script>
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
-
+import {
+  checkEmail,
+  checkPassword,
+  stripscript,
+  validateCode
+} from "@/utils/validate";
 export default {
   //import引入的组件需要注入到对象中才能使用
-  name:"loginIndex",
+  name: "loginIndex",
   data() {
     //这里存放数据
-    return {};
+    let validatePass = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("请输入用户名"));
+      } else if (checkEmail(value)) {
+        callback(new Error("用户名格式有误"));
+      } else {
+        callback();
+      }
+    };
+    let validatePassword = (rule, value, callback) => {
+      this.ruleForm.password = stripscript(value);
+      value = this.ruleForm.password;
+      //console.log(stripscript(value))
+      if (value === "") {
+        callback(new Error("请输入密码"));
+      } else if (checkPassword(value)) {
+        callback(new Error("密码为6位至20位数字或字母!"));
+      } else {
+        callback();
+      }
+    };
+    let validatePasswords = (rule, value, callback) => {
+      if (this.model === "login") {
+        callback();
+      }
+
+      this.ruleForm.passwords = stripscript(value);
+      value = this.ruleForm.passwords;
+      //console.log(stripscript(value))
+      if (value === "") {
+        callback(new Error("请再次输入密码"));
+      } else if (value != this.ruleForm.password) {
+        callback(new Error("重复密码不正确!"));
+      } else {
+        callback();
+      }
+    };
+    let checkCode = (rule, value, callback) => {
+      this.ruleForm.code = stripscript(value);
+      value = this.ruleForm.code;
+
+      if (value === "") {
+        callback(new Error("请输入验证码"));
+      } else if (validateCode(value)) {
+        callback(new Error("验证码格式有误"));
+      } else {
+        callback();
+      }
+    };
+    return {
+      model: "login",
+      menuTab: [
+        { txt: "登录", current: true, type: "login" },
+        { txt: "注册", current: false, type: "register" }
+      ],
+      ruleForm: {
+        username: "",
+        password: "",
+        passwords: "",
+        code: ""
+      },
+      rules: {
+        username: [{ validator: validatePass, trigger: "blur" }],
+        password: [{ validator: validatePassword, trigger: "blur" }],
+        passwords: [{ validator: validatePasswords, trigger: "blur" }],
+        code: [{ validator: checkCode, trigger: "blur" }]
+      }
+    };
   },
   //监听属性 类似于data概念
   computed: {},
   //监控data中的数据变化
   watch: {},
   //方法集合
-  methods: {},
+  methods: {
+    togglemenu(data) {
+      this.menuTab.forEach(item => {
+        item.current = false;
+      });
+      data.current = true;
+      this.model = data.type;
+    },
+
+    submitForm(formName) {
+      // return false;
+      console.log(this.$refs[formName]);
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          alert("submit!");
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    }
+  },
   //生命周期 - 创建完成（可以访问当前this实例）
   created() {},
   //生命周期 - 挂载完成（可以访问DOM元素）
@@ -46,8 +180,47 @@ export default {
 </script>
 <style lang='scss' scoped>
 //@import url(); 引入公共css类
-.login{
-    height: 100vh;
-    background: #344a5f;
+.login {
+  height: 100vh;
+  background: #344a5f;
+  .login-wrap {
+    width: 330px;
+    margin: 0 auto;
+    .menu-tab {
+      text-align: center;
+      li {
+        display: inline-block;
+        width: 88px;
+        line-height: 36px;
+        font-size: 14px;
+        color: aliceblue;
+        border-radius: 2px;
+        cursor: pointer;
+      }
+      .current {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .login-form {
+      label {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 14px;
+        color: #fff;
+      }
+      .item-form {
+        margin-bottom: 13px;
+      }
+
+      .block {
+        display: block;
+        width: 100%;
+      }
+      .login-btn {
+        margin-top: 19px;
+      }
+    }
+  }
 }
 </style>
