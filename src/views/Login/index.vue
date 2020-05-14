@@ -43,12 +43,22 @@
               <el-input v-model="ruleForm.code"></el-input>
             </el-col>
             <el-col :span="9">
-              <el-button type="success" class="block">获取验证码</el-button>
+              <el-button
+                type="success"
+                class="block"
+                @click="GetSms"
+                :disabled="codeButtonStatus.status"
+              >{{codeButtonStatus.text}}</el-button>
             </el-col>
           </el-row>
         </el-form-item>
         <el-form-item>
-          <el-button type="danger" @click="submitForm('ruleForm')" class="login-btn block">登录</el-button>
+          <el-button
+            type="danger"
+            @click="submitForm('ruleForm')"
+            :disabled="loginButtonStatus"
+            class="login-btn block"
+          >{{model=='register'?"注册":"登录"}}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -64,6 +74,7 @@ import {
   stripscript,
   validateCode
 } from "@/utils/validate";
+import { getSms, Register, Login } from "@/api/login";
 export default {
   //import引入的组件需要注入到对象中才能使用
   name: "loginIndex",
@@ -135,7 +146,13 @@ export default {
         password: [{ validator: validatePassword, trigger: "blur" }],
         passwords: [{ validator: validatePasswords, trigger: "blur" }],
         code: [{ validator: checkCode, trigger: "blur" }]
-      }
+      },
+      loginButtonStatus: true,
+      codeButtonStatus: {
+        status: false,
+        text: "获取验证码"
+      },
+      timer: null
     };
   },
   //监听属性 类似于data概念
@@ -150,19 +167,136 @@ export default {
       });
       data.current = true;
       this.model = data.type;
-    },
 
+      this.$refs.ruleForm.resetFields();
+      this.clearCountDown();
+    },
     submitForm(formName) {
       // return false;
-      console.log(this.$refs[formName]);
+
       this.$refs[formName].validate(valid => {
         if (valid) {
-          alert("submit!");
+        
+          this.model === "login" ? this.login() : this.register();
         } else {
           console.log("error submit!!");
           return false;
         }
       });
+    },
+    /**
+     * 验证码
+     */
+    GetSms() {
+      if (!this.ruleForm.username) {
+        this.$message({
+          showClose: true,
+          message: "邮箱不能为空",
+          type: "error"
+        });
+        return false;
+      }
+
+      if (checkEmail(this.ruleForm.username)) {
+        this.$message({
+          showClose: true,
+          message: "邮箱格式有误",
+          type: "error"
+        });
+        return false;
+      }
+
+      this.codeButtonStatus.status = true;
+      this.codeButtonStatus.text = "发送中";
+
+      getSms({ username: this.ruleForm.username, model: this.model.value })
+        .then(response => {
+          let data = response.data;
+          this.$message({
+            message: data.message,
+            type: "success"
+          });
+
+          this.loginButtonStatus = false;
+          this.countDown(10);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    /**
+     * 注册
+     */
+    register() {
+      let requestData = {
+        username: this.ruleForm.username,
+        password: this.ruleForm.password,
+        code: this.ruleForm.code,
+        model: "register"
+      };
+      Register(requestData)
+        .then(response => {
+          let data = response.data;
+          this.$message({
+            message: data.message,
+            type: "success"
+          });
+
+          this.togglemenu(menuTab[0]);
+          this.clearCountDown();
+        })
+        .catch(error => {});
+    },
+    /**
+     * 登录
+     */
+    login() {
+      let requestData = {
+        username: this.ruleForm.username,
+        password: this.ruleForm.password,
+        code: this.ruleForm.code
+      };
+      Login(requestData)
+        .then(response => {
+          let data = response.data;
+          this.$message({
+            message: data.message,
+            type: "success"
+          });
+          // root.$router.push({
+          //   name: "Console"
+          // });
+        })
+        .catch(error => {});
+    },
+    /**
+     * 倒计时
+     */
+    countDown(num) {
+      if (this.timer) {
+        clearInterval(timer.value);
+      }
+      let time = num;
+
+      this.timer = setInterval(() => {
+        time--;
+        // console.log(time);
+        if (time === 0) {
+          clearInterval(this.timer);
+          this.codeButtonStatus.status = false;
+          this.codeButtonStatus.text = "再次获取";
+        } else {
+          this.codeButtonStatus.text = `倒计时${time}秒`;
+        }
+      }, 1000);
+    },
+    /**
+     * 清除倒计时
+     */
+    clearCountDown() {
+      this.codeButtonStatus.status = false;
+      this.codeButtonStatus.text = "获取验证码";
+      clearInterval(this.timer);
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
