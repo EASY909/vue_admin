@@ -176,10 +176,13 @@ export default {
 
       this.$refs[formName].validate(valid => {
         if (valid) {
-        
           this.model === "login" ? this.login() : this.register();
         } else {
-          console.log("error submit!!");
+          this.$message({
+            showClose: true,
+            message: "保证信息完整！",
+            type: "error"
+          });
           return false;
         }
       });
@@ -238,6 +241,7 @@ export default {
         .then(response => {
           let data = response.data;
           this.$message({
+            showClose: true,
             message: data.message,
             type: "success"
           });
@@ -258,14 +262,15 @@ export default {
       };
       Login(requestData)
         .then(response => {
-          let data = response.data;
-          this.$message({
-            message: data.message,
-            type: "success"
-          });
-          // root.$router.push({
-          //   name: "Console"
+          // let data = response.data;
+          // this.$message({
+          //   showClose: true,
+          //   message: data.message,
+          //   type: "success"
           // });
+          this.$router.push({
+            name: "Console"
+          });
         })
         .catch(error => {});
     },

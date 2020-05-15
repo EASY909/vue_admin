@@ -13,6 +13,19 @@ export default new Router({
       path: '/login',
       name: 'Login',
       component: () => import( '../views/Login/index.vue')
+    },
+    {
+      path: '/console',
+      name: 'Console',
+      redirect:"/consoleIndex",
+      component: () => import( '../views/Layout/index.vue'),
+      children:[
+        {
+          path: '/consoleIndex',
+          name: 'ConsoleIndex',
+          component: () => import( '../views/Console/index.vue')
+        },
+      ]
     }
   ]
 })
