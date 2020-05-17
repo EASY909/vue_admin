@@ -1,6 +1,35 @@
 <!--  -->
 <template>
-  <div class="navIndex">导航</div>
+  <div class="navIndex">
+    <h1 class="logo">
+      <img src="../../../assets/logo.png" alt />
+    </h1>
+    <el-menu
+      :default-active="defaultActive"
+      class="el-menu-vertical-demo"
+      @open="handleOpen"
+      @close="handleClose"
+      background-color="transparent "
+      text-color="#fff"
+      active-text-color="#fff"
+      :collapse="isCollapse"
+      router
+    >
+      <template v-for="(item,index) in routers">
+        <el-submenu :key="index" v-if="!item.hidden" :index="item.path">
+          <template slot="title">
+            <svg-icon :iconClass="item.meta.icon" :className="item.meta.icon" />
+            <span>{{item.meta.name}}</span>
+          </template>
+          <el-menu-item
+            v-for="(subItem,index) in item.children"
+            :key="index"
+            :index="subItem.path"
+          >{{subItem.meta.name}}</el-menu-item>
+        </el-submenu>
+      </template>
+    </el-menu>
+  </div>
 </template>
 
 <script>
@@ -13,18 +42,33 @@ export default {
   components: {},
   data() {
     //这里存放数据
-    return {};
+    return {
+      routers: this.$router.options.routes,
+      isCollapse: false
+    };
   },
   //监听属性 类似于data概念
-  computed: {},
+  computed: {
+    defaultActive() {
+      const route = this.$route;
+      const { path } = route;
+      console.log(path);
+      return path;
+    }
+  },
   //监控data中的数据变化
   watch: {},
   //方法集合
-  methods: {},
+  methods: {
+    handleOpen() {},
+    handleClose() {}
+  },
   //生命周期 - 创建完成（可以访问当前this实例）
   created() {},
   //生命周期 - 挂载完成（可以访问DOM元素）
-  mounted() {},
+  mounted() {
+    console.log(this.$router.options.routes);
+  },
   beforeCreate() {}, //生命周期 - 创建之前
   beforeUpdate() {}, //生命周期 - 更新之前
   updated() {}, //生命周期 - 更新之后
@@ -43,5 +87,18 @@ export default {
   height: 100vh;
   width: $navMenu;
   background-color: #344a5f;
+  @include webkit(transition, all 0.3s ease 0s);
+  svg {
+    font-size: 20px;
+    margin-right: 10px;
+  }
+  .logo {
+    text-align: center;
+    img {
+      margin: 28px auto 25px;
+      width: 92px;
+      @include webkit(transition, all 0.3s ease 0s);
+    }
+  }
 }
 </style>

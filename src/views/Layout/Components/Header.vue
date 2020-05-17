@@ -1,6 +1,19 @@
 <!--  -->
 <template>
-  <div class="headerIndex">头部</div>
+  <div class="headerIndex">
+    <div class="pull-left header-icon" @click="navCollapse">
+      <svg-icon iconClass="menu" class="menu"></svg-icon>
+    </div>
+    <div class="pull-right">
+      <div class="user-info pull-left">
+        <img src="../../../assets/face.jpg" alt />
+        哈哈哈
+      </div>
+      <div class="header-icon pull-left" @click="out">
+        <svg-icon iconClass="exit" class="exit"></svg-icon>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -20,7 +33,14 @@ export default {
   //监控data中的数据变化
   watch: {},
   //方法集合
-  methods: {},
+  methods: {
+    navCollapse(){
+
+    },
+    out(){
+
+    }
+  },
   //生命周期 - 创建完成（可以访问当前this实例）
   created() {},
   //生命周期 - 挂载完成（可以访问DOM元素）
@@ -36,13 +56,40 @@ export default {
 </script>
 <style lang='scss' scoped>
 //@import url(); 引入公共css类
+@import "../../../styles/config.scss";
 .headerIndex {
   position: fixed;
   top: 0;
   right: 0;
-  left: 250px;
+  left: $navMenu;
   height: 75px;
   background-color: #fff;
   line-height: 75px;
+}
+
+.header-icon {
+  padding: 0 32px;
+  svg {
+    font-size: 25px;
+    margin-bottom: -8px;
+    cursor: pointer;
+  }
+}
+
+.user-info {
+  height: 100%;
+  padding: 0 32px;
+  + .header-icon {
+    padding: 0 32px;
+  }
+  border: 1px solid #ededed;
+  img {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    line-height: 18px;
+    vertical-align: middle;
+    margin-right: 10px;
+  }
 }
 </style>
