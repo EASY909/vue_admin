@@ -7,8 +7,6 @@
     <el-menu
       :default-active="defaultActive"
       class="el-menu-vertical-demo"
-      @open="handleOpen"
-      @close="handleClose"
       background-color="transparent "
       text-color="#fff"
       active-text-color="#fff"
@@ -44,7 +42,7 @@ export default {
     //这里存放数据
     return {
       routers: this.$router.options.routes,
-      isCollapse: false
+     
     };
   },
   //监听属性 类似于data概念
@@ -52,8 +50,11 @@ export default {
     defaultActive() {
       const route = this.$route;
       const { path } = route;
-      console.log(path);
+      // console.log(path);
       return path;
+    },
+    isCollapse(){
+      return this.$store.state.login.isCollapse
     }
   },
   //监控data中的数据变化
@@ -67,7 +68,7 @@ export default {
   created() {},
   //生命周期 - 挂载完成（可以访问DOM元素）
   mounted() {
-    console.log(this.$router.options.routes);
+
   },
   beforeCreate() {}, //生命周期 - 创建之前
   beforeUpdate() {}, //生命周期 - 更新之前
@@ -98,6 +99,19 @@ export default {
       margin: 28px auto 25px;
       width: 92px;
       @include webkit(transition, all 0.3s ease 0s);
+    }
+  }
+}
+.open {
+  .navIndex{
+    width: $navMenu;
+  }
+}
+.close {
+  .navIndex {
+    width: $navMenuMin;
+    .logo img {
+      width: 60%;
     }
   }
 }

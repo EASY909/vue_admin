@@ -1,6 +1,6 @@
 <!--  -->
 <template>
-  <div class="layoutIndex">
+  <div class="layoutIndex" :class="[menuStatus?'close':'open']">
       <Header/>
       <Main/>
       <Nav/>
@@ -22,7 +22,11 @@ export default {
     return {};
   },
   //监听属性 类似于data概念
-  computed: {},
+  computed: {
+    menuStatus(){
+      return this.$store.state.login.isCollapse;
+    }
+  },
   //监控data中的数据变化
   watch: {},
   //方法集合

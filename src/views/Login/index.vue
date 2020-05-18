@@ -260,19 +260,19 @@ export default {
         password: this.ruleForm.password,
         code: this.ruleForm.code
       };
-      Login(requestData)
-        .then(response => {
-          // let data = response.data;
-          // this.$message({
-          //   showClose: true,
-          //   message: data.message,
-          //   type: "success"
-          // });
-          this.$router.push({
-            name: "Console"
-          });
-        })
-        .catch(error => {});
+      this.$store.dispatch("login/login", requestData).then(res => {
+        let data = res.data;
+ 
+        // this.$message({
+        //   message: data.message,
+        //   type: "success"
+        // });
+        this.$router.push({
+          name: "Console"
+        });
+      }).catch(error => {
+        console.log(error);
+      });
     },
     /**
      * 倒计时

@@ -7,7 +7,7 @@
     <div class="pull-right">
       <div class="user-info pull-left">
         <img src="../../../assets/face.jpg" alt />
-        哈哈哈
+        {{username}}
       </div>
       <div class="header-icon pull-left" @click="out">
         <svg-icon iconClass="exit" class="exit"></svg-icon>
@@ -29,16 +29,24 @@ export default {
     return {};
   },
   //监听属性 类似于data概念
-  computed: {},
+  computed: {
+    username(){
+      return this.$store.state.login.username
+    }
+  },
   //监控data中的数据变化
   watch: {},
   //方法集合
   methods: {
     navCollapse(){
-
+      this.$store.commit('login/SET_COLLAPSE')
     },
     out(){
-
+       this.$store.dispatch('login/out').then(res=>{
+        this.$router.push({
+          name:"Login"
+        })
+       })
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
@@ -65,6 +73,8 @@ export default {
   height: 75px;
   background-color: #fff;
   line-height: 75px;
+  @include webkit(box-shadow, 0 3px 16px 0 rgba(0, 0, 0, 0.1));
+  @include webkit(transition, all 0.3s ease 0s);
 }
 
 .header-icon {
@@ -75,7 +85,16 @@ export default {
     cursor: pointer;
   }
 }
-
+.open {
+  .headerIndex {
+    left: $navMenu;
+  }
+}
+.close {
+  .headerIndex {
+    left: $navMenuMin;
+  }
+}
 .user-info {
   height: 100%;
   padding: 0 32px;
