@@ -323,8 +323,9 @@ export default {
   height: 100vh;
   background: #344a5f;
   .login-wrap {
+    // transform: translateY(50%);
     width: 330px;
-    margin: 0 auto;
+    margin:0 auto;
     .menu-tab {
       text-align: center;
       li {
