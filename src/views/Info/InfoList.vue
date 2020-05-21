@@ -72,15 +72,15 @@
       <el-table-column prop="user" label="管理员" width="115"></el-table-column>
       <el-table-column prop="option" label="操作">
         <template slot-scope="scope">
-          <el-button type="danger" size="medium">删除</el-button>
-          <el-button type="success" size="medium">编辑</el-button>
+          <el-button type="danger" size="medium" @click="deleteItem">删除</el-button>
+          <el-button type="success" size="medium" @click="dialog_info=true">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
     <div class="black-space-30"></div>
     <el-row>
       <el-col :span="12">
-        <el-button size="medium">批量删除</el-button>
+        <el-button size="medium" @click="deleteAll">批量删除</el-button>
       </el-col>
 
       <el-col :span="12">
@@ -94,20 +94,19 @@
         ></el-pagination>
       </el-col>
     </el-row>
-    
-    <DialogInfo :flag.sync="dialog_info" />
 
+    <DialogInfo :flag.sync="dialog_info" />
   </div>
 </template>
 
 <script>
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
-import DialogInfo from "./dialog/info"
+import DialogInfo from "./dialog/info";
 export default {
   name: "InfoList",
   //import引入的组件需要注入到对象中才能使用
-  components: {DialogInfo},
+  components: { DialogInfo },
   data() {
     //这里存放数据
     return {
@@ -155,8 +154,7 @@ export default {
           user: "王小虎"
         }
       ],
-      dialog_info:false
-     
+      dialog_info: false
     };
   },
   //监听属性 类似于data概念
@@ -167,7 +165,22 @@ export default {
   methods: {
     handleSizeChange() {},
     handleCurrentChange() {},
-    search(){}
+    search() {},
+    confirmDelete(a){
+      console.log(a);
+    },
+    deleteItem() {
+        this.confirm({
+        content:"确认删除？",
+        fn:this.confirmDelete
+      })
+    },
+    deleteAll(){
+      this.confirm({
+        content:"确认删除？",
+        fn:this.confirmDelete
+      })
+    }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
   created() {},

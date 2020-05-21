@@ -59,8 +59,6 @@ export default {
   //监控data中的数据变化
   watch: {
     flag(nv, ov) {
-      console.log(nv);
-
       this.flag_self = nv;
     }
   },
