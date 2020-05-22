@@ -67,8 +67,8 @@
     <el-table :data="tableData" border style="width: 100%">
       <el-table-column type="selection" width="45"></el-table-column>
       <el-table-column prop="title" label="标题" width="830"></el-table-column>
-      <el-table-column prop="category" label="类别" width="130"></el-table-column>
-      <el-table-column prop="date" label="日期" width="137"></el-table-column>
+      <el-table-column prop="categoryId" label="类别" width="130"></el-table-column>
+      <el-table-column prop="createDate" label="日期" width="137"></el-table-column>
       <el-table-column prop="user" label="管理员" width="115"></el-table-column>
       <el-table-column prop="option" label="操作">
         <template slot-scope="scope">
@@ -90,12 +90,14 @@
           @current-change="handleCurrentChange"
           background
           layout="total,prev,sizes, pager, next"
-          :total="1000"
+          :total="total"
+          :page-sizes="[2, 5, 10, 20]"
+          :page-size="5"
         ></el-pagination>
       </el-col>
     </el-row>
 
-    <DialogInfo :flag.sync="dialog_info" />
+    <DialogInfo :flag.sync="dialog_info" :infocategory="options.category" />
   </div>
 </template>
 
@@ -103,6 +105,7 @@
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
 import DialogInfo from "./dialog/info";
+import { GetList, DeleteInfo } from "@/api/news.js";
 export default {
   name: "InfoList",
   //import引入的组件需要注入到对象中才能使用
@@ -111,7 +114,9 @@ export default {
     //这里存放数据
     return {
       typeValue: "",
-      options: [],
+      options: {
+        category: []
+      },
       dateValue: "",
       data: {
         configOption: ""
@@ -128,33 +133,13 @@ export default {
           label: "标题"
         }
       ],
-      tableData: [
-        {
-          title: "2016-05-02",
-          category: "王小虎",
-          date: "上海市普陀区金沙江路 1518 弄",
-          user: "王小虎"
-        },
-        {
-          title: "2016-05-02",
-          category: "王小虎",
-          date: "上海市普陀区金沙江路 1518 弄",
-          user: "王小虎"
-        },
-        {
-          title: "2016-05-02",
-          category: "王小虎",
-          date: "上海市普陀区金沙江路 1518 弄",
-          user: "王小虎"
-        },
-        {
-          title: "2016-05-02",
-          category: "王小虎",
-          date: "上海市普陀区金沙江路 1518 弄",
-          user: "王小虎"
-        }
-      ],
-      dialog_info: false
+      tableData: [],
+      dialog_info: false,
+      total: 0,
+      page: {
+        pageNumber: 1,
+        pageSize: 5
+      }
     };
   },
   //监听属性 类似于data概念
@@ -163,27 +148,62 @@ export default {
   watch: {},
   //方法集合
   methods: {
-    handleSizeChange() {},
-    handleCurrentChange() {},
+    handleSizeChange(val) {
+      this.page.pageSize = val;
+      this.getList();
+    },
+    handleCurrentChange(val) {
+      this.page.pageNumber = val;
+      this.getList();
+    },
     search() {},
-    confirmDelete(a){
+    confirmDelete(a) {
       console.log(a);
     },
     deleteItem() {
-        this.confirm({
-        content:"确认删除？",
-        fn:this.confirmDelete
-      })
-    },
-    deleteAll(){
       this.confirm({
-        content:"确认删除？",
-        fn:this.confirmDelete
-      })
+        content: "确认删除？",
+        fn: this.confirmDelete
+      });
+    },
+    deleteAll() {
+      this.confirm({
+        content: "确认删除？",
+        fn: this.confirmDelete
+      });
+    },
+    GetCategory() {
+      this.getCategory().then(res => {
+        this.options.category = res;
+      });
+    },
+    getList() {
+      let resData = {
+        categoryId: "",
+        startTiem: "",
+        endTime: "",
+        title: "",
+        id: "",
+        pageNumber: this.page.pageNumber,
+        pageSize: this.page.pageSize
+      };
+      GetList(resData)
+        .then(res => {
+          let data = res.data.data;
+          this.total = data.total;
+
+          this.tableData = data.data;
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
-  created() {},
+  created() {
+    this.GetCategory();
+    this.getList();
+  },
   //生命周期 - 挂载完成（可以访问DOM元素）
   mounted() {},
   beforeCreate() {}, //生命周期 - 创建之前

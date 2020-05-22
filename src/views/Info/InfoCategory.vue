@@ -72,7 +72,14 @@
 <script>
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
-import { GetCategoryAll, AddFristCategory } from "@/api/news";
+import {
+  AddFristCategory,
+  GetCategory,
+  DeleteCategory,
+  EditCategory,
+  AddChildrenCategory,
+  GetCategoryAll
+} from "@/api/news.js";
 export default {
   name: "InfoCategory",
   //import引入的组件需要注入到对象中才能使用
@@ -81,7 +88,8 @@ export default {
     //这里存放数据
     return {
       infos: {
-        items: []
+        items: [],
+        current: []
       },
       labelPosition: "right",
       formLabelAlign: {
@@ -95,7 +103,8 @@ export default {
       second_input_dis: true,
       submitloading: false,
       butdis: true,
-      subtype: ""
+      subtype: "",
+      categoryId: ""
     };
   },
   //监听属性 类似于data概念
@@ -122,6 +131,36 @@ export default {
             this.submitloading = false;
           });
       }
+
+      if (this.subtype == "first_edit") {
+        this.editCategory();
+      }
+
+      if (this.subtype == "add_son") {
+        let data = {
+          categoryName: this.formLabelAlign.region,
+          parentId: this.infos.current.id
+        };
+
+        AddChildrenCategory(data)
+          .then(Response => {
+            this.$message(Response.message);
+            this.$message({
+              type: "success",
+              message: Response.data.message
+            });
+            // infos.items.push(Response.data.data);
+            // getCategory()
+            this.submitloading = false;
+
+            // setTimeout(this.getCategoryAll(),1000)
+            this.getCategoryAll()
+          })
+          .catch(error => {
+            this.submitloading = false;
+          })
+         
+      }
     },
     firstItem(s) {
       this.subtype = s;
@@ -130,12 +169,85 @@ export default {
       this.butdis = false;
       this.first_input_dis = false;
       this.second_input_dis = false;
+      this.formLabelAlign.name = "";
+      this.submitloading = false;
     },
     getCategoryAll() {
       GetCategoryAll().then(res => {
-        console.log(res.data.data);
         this.infos.items = res.data.data;
       });
+    },
+    deleteCategory() {
+      DeleteCategory({
+        categoryId: this.categoryId
+      })
+        .then(res => {
+          this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
+          this.infos.items = this.infos.items.filter(item => {
+            return item.id != this.categoryId;
+          });
+
+          this.categoryId = "";
+        })
+        .catch(error => {});
+    },
+    deleteFirstConfirm(cateid) {
+      this.categoryId = cateid;
+      this.confirm({
+        content: "确认删除？",
+        fn: this.deleteCategory
+      });
+    },
+
+    editFirst(data) {
+      this.subtype = data.type;
+      this.second_input = false;
+      this.first_input_dis = false;
+      this.butdis = false;
+      this.formLabelAlign.name = data.data.category_name;
+      this.infos.current = data.data;
+      this.submitloading = false;
+    },
+    editCategory() {
+      if (this.infos.current.length == 0) {
+        this.$message({
+          type: "warning",
+          message: "未选择分类！"
+        });
+        return;
+      }
+      let currentData = {
+        id: this.infos.current.id,
+        categoryName: this.formLabelAlign.name
+      };
+      EditCategory(currentData)
+        .then(Response => {
+          this.$message({
+            type: "success",
+            message: Response.data.message
+          });
+
+          this.infos.current.category_name =
+            Response.data.data.data.categoryName;
+
+          // this.infos.current = [];
+          // this.formLabelAlign.name = "";
+          this.submitloading = false;
+        })
+        .catch(error => {});
+    },
+    addSon(parms) {
+      this.subtype = parms.type;
+      this.formLabelAlign.name = parms.data.category_name;
+      this.first_input = true;
+      this.first_input_dis = true;
+      this.second_input = true;
+      this.butdis = false;
+      this.second_input_dis = false;
+      this.infos.current = parms.data;
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）

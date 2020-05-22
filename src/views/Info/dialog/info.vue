@@ -1,9 +1,9 @@
 <!--  -->
 <template>
-  <el-dialog title="新增" :visible.sync="flag_self" @close="close" width="580px">
+  <el-dialog title="新增" :visible.sync="flag_self" @close="close" width="580px" @opened="opened">
     <el-form :model="form" ref="addInfoForm">
       <el-form-item label="类型" :label-width="formLabelWidth">
-        <el-select v-model="form.categroy" placeholder="请选择活动区域">
+        <el-select v-model="form.categroy" placeholder="类型">
           <el-option
             v-for="items in openedCate.items"
             :key="items.id"
@@ -21,7 +21,7 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="flag_self = false">取消</el-button>
-      <el-button type="danger" @click="submit">确定</el-button>
+      <el-button type="danger" :loading="subloading" @click="submit">确定</el-button>
     </div>
   </el-dialog>
 </template>
@@ -29,7 +29,7 @@
 <script>
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
-
+import { AddInfo } from "@/api/news.js";
 export default {
   //import引入的组件需要注入到对象中才能使用
   name: "infoDialog",
@@ -38,6 +38,10 @@ export default {
     flag: {
       type: Boolean,
       default: false
+    },
+    infocategory: {
+      type: Array,
+      default: []
     }
   },
   data() {
@@ -46,12 +50,14 @@ export default {
       flag_self: false,
       form: {
         name: "",
-        content: ""
+        content: "",
+        categroy: ""
       },
       formLabelWidth: "70px",
       openedCate: {
         items: []
-      }
+      },
+      subloading: false
     };
   },
   //监听属性 类似于data概念
@@ -67,7 +73,40 @@ export default {
     close() {
       this.$emit("update:flag", false);
     },
-    submit() {}
+    submit() {
+      this.subloading = true;
+      if (!this.form.categroy || !this.form.name || !this.form.content) {
+        this.$message({
+          message:"不能为空！",
+          type: "danger"
+        });
+        this.subloading = false;
+        return
+      }
+      let data = {
+        category: this.form.categroy,
+        title: this.form.name,
+        content: this.form.content
+      };
+      AddInfo(data)
+        .then(Response => {
+          this.$message({
+            message: Response.data.message,
+            type: "success"
+          });
+          this.form.name = "";
+          this.form.content = "";
+          this.form.categroy = "";
+          // close();
+          this.subloading = false;
+        })
+        .catch(error => {
+          this.subloading = false;
+        });
+    },
+    opened() {
+      this.openedCate.items = this.infocategory;
+    }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
   created() {},
