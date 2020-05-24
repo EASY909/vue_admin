@@ -64,15 +64,16 @@
       </el-col>
     </el-row>
     <div class="black-space-30"></div>
-    <el-table :data="tableData" border style="width: 100%">
+    <el-table :data="tableData" @selection-change="handleSelectionChange">
+      border style="width: 100%" v-loading="loading">
       <el-table-column type="selection" width="45"></el-table-column>
       <el-table-column prop="title" label="标题" width="830"></el-table-column>
-      <el-table-column prop="categoryId" label="类别" width="130"></el-table-column>
-      <el-table-column prop="createDate" label="日期" width="137"></el-table-column>
+      <el-table-column prop="categoryId" label="类别" width="130" :formatter="toCate"></el-table-column>
+      <el-table-column prop="createDate" label="日期" width="137" :formatter="toDate"></el-table-column>
       <el-table-column prop="user" label="管理员" width="115"></el-table-column>
       <el-table-column prop="option" label="操作">
         <template slot-scope="scope">
-          <el-button type="danger" size="medium" @click="deleteItem">删除</el-button>
+          <el-button type="danger" size="medium" @click="deleteItem(scope.row)">删除</el-button>
           <el-button type="success" size="medium" @click="dialog_info=true">编辑</el-button>
         </template>
       </el-table-column>
@@ -106,6 +107,7 @@
 //例如：import 《组件名称》 from '《组件路径》';
 import DialogInfo from "./dialog/info";
 import { GetList, DeleteInfo } from "@/api/news.js";
+import { timestampToTime } from "@/utils/validate.js";
 export default {
   name: "InfoList",
   //import引入的组件需要注入到对象中才能使用
@@ -139,7 +141,9 @@ export default {
       page: {
         pageNumber: 1,
         pageSize: 5
-      }
+      },
+      loading: false,
+      deInfoId: []
     };
   },
   //监听属性 类似于data概念
@@ -156,17 +160,67 @@ export default {
       this.page.pageNumber = val;
       this.getList();
     },
-    search() {},
-    confirmDelete(a) {
-      console.log(a);
+    search() {
+      console.log(this.typeValue);
+      console.log(this.dateValue);
+      console.log(this.search_key);
+      console.log(this.search_keyWork);
+      let resData = {};
+      if (this.search_key === "id") {
+        resData = {
+          categoryId: this.typeValue,
+          startTiem: this.dateValue[0],
+          endTime: this.dateValue[1],
+          title: "",
+          id: this.search_keyWork,
+          pageNumber: this.page.pageNumber,
+          pageSize: this.page.pageSize
+        };
+      } else {
+        resData = {
+          categoryId: this.typeValue,
+          startTiem: this.dateValue[0],
+          endTime: this.dateValue[1],
+          title: this.search_keyWork,
+          id: "",
+          pageNumber: this.page.pageNumber,
+          pageSize: this.page.pageSize
+        };
+      }
+
+      this.loading = true;
+      GetList(resData)
+        .then(res => {
+          let data = res.data.data;
+
+          this.total = data.total;
+          this.tableData = data.data;
+
+          this.loading = false;
+        })
+        .catch(error => {
+          this.loading = false;
+        });
     },
-    deleteItem() {
+    confirmDelete() {
+      // console.log(this.deInfoId);
+      DeleteInfo({ id: this.deInfoId })
+        .then(res => {
+          // console.log(res);
+          this.getList();
+        })
+        .catch(error => {});
+    },
+    deleteItem(data) {
+      // console.log(data.id);
+      this.deInfoId.push(data.id);
       this.confirm({
         content: "确认删除？",
         fn: this.confirmDelete
       });
     },
     deleteAll() {
+      if (this.deInfoId.length === 0) return;
       this.confirm({
         content: "确认删除？",
         fn: this.confirmDelete
@@ -187,16 +241,35 @@ export default {
         pageNumber: this.page.pageNumber,
         pageSize: this.page.pageSize
       };
+      this.loading = true;
       GetList(resData)
         .then(res => {
           let data = res.data.data;
-          this.total = data.total;
 
+          this.total = data.total;
           this.tableData = data.data;
+
+          this.loading = false;
         })
         .catch(error => {
-          console.log(error);
+          this.loading = false;
         });
+    },
+    toDate(row, column, cellValue, index) {
+      return timestampToTime(row.createDate);
+    },
+    toCate(row, column, cellValue, index) {
+      let data = this.options.category.filter((item, index) => {
+        return item.id === row.categoryId;
+      });
+      console.log(data);
+      return data[0].category_name;
+    },
+    handleSelectionChange(val) {
+      this.deInfoId = [];
+      val.forEach((item, index) => {
+        this.deInfoId.push(item.id);
+      });
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
