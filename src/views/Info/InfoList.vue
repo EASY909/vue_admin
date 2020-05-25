@@ -74,7 +74,7 @@
       <el-table-column prop="option" label="操作">
         <template slot-scope="scope">
           <el-button type="danger" size="medium" @click="deleteItem(scope.row)">删除</el-button>
-          <el-button type="success" size="medium" @click="dialog_info=true">编辑</el-button>
+          <el-button type="success" size="medium" @click="edit(scope.row.id)">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -99,6 +99,7 @@
     </el-row>
 
     <DialogInfo :flag.sync="dialog_info" :infocategory="options.category" />
+    <DialogInfoEdit :editId="editId" @getList="getList" :flag.sync="dialog_info_edit" :infocategory="options.category" />
   </div>
 </template>
 
@@ -106,12 +107,13 @@
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
 import DialogInfo from "./dialog/info";
+import DialogInfoEdit from "./dialog/edit";
 import { GetList, DeleteInfo } from "@/api/news.js";
 import { timestampToTime } from "@/utils/validate.js";
 export default {
   name: "InfoList",
   //import引入的组件需要注入到对象中才能使用
-  components: { DialogInfo },
+  components: { DialogInfo ,DialogInfoEdit},
   data() {
     //这里存放数据
     return {
@@ -137,13 +139,15 @@ export default {
       ],
       tableData: [],
       dialog_info: false,
+      dialog_info_edit: false,
       total: 0,
       page: {
         pageNumber: 1,
         pageSize: 5
       },
       loading: false,
-      deInfoId: []
+      deInfoId: [],
+      editId:""
     };
   },
   //监听属性 类似于data概念
@@ -270,6 +274,11 @@ export default {
       val.forEach((item, index) => {
         this.deInfoId.push(item.id);
       });
+    },
+    edit(val){
+     
+      this.editId=val;
+      this.dialog_info_edit=true
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）

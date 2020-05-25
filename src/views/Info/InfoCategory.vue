@@ -27,13 +27,18 @@
                   <el-button size="mini" type round @click="deleteFirstConfirm(items.id)">删除</el-button>
                 </div>
               </h4>
-              <ul>
+              <ul v-if="items.children">
                 <li v-for="child in items.children" :key="child.id">
                   {{child.category_name}}
                   <div class="button-group">
-                    <el-button size="mini" type="danger" round>编辑</el-button>
+                    <el-button
+                      size="mini"
+                      type="danger"
+                      @click="editSecond({data:child,type:'second_edit'})"
+                      round
+                    >编辑</el-button>
 
-                    <el-button size="mini" type round>删除</el-button>
+                    <el-button size="mini" type round @click="deleteSecondConfirm(child.id)">删除</el-button>
                   </div>
                 </li>
               </ul>
@@ -42,7 +47,7 @@
         </el-col>
 
         <el-col :span="16">
-          <div class="menu-title">一级分类编辑</div>
+          <div class="menu-title">{{this.first_input?"一级分类编辑":"二级分类编辑"}}</div>
           <el-form
             :label-position="labelPosition"
             label-width="142px"
@@ -97,6 +102,7 @@ export default {
         region: "",
         type: ""
       },
+
       first_input: true,
       first_input_dis: true,
       second_input: true,
@@ -137,6 +143,15 @@ export default {
       }
 
       if (this.subtype == "add_son") {
+        if (this.formLabelAlign.region.trim() === "") {
+          this.$message({
+            type: "warning",
+            message: "分类不能为空！"
+          });
+          this.submitloading = false;
+          return;
+        }
+
         let data = {
           categoryName: this.formLabelAlign.region,
           parentId: this.infos.current.id
@@ -154,12 +169,44 @@ export default {
             this.submitloading = false;
 
             // setTimeout(this.getCategoryAll(),1000)
-            this.getCategoryAll()
+            this.getCategoryAll();
           })
           .catch(error => {
             this.submitloading = false;
+          });
+      }
+
+      if (this.subtype == "second_edit") {
+        if (this.formLabelAlign.region.trim() === "") {
+          this.$message({
+            type: "warning",
+            message: "分类不能为空！"
+          });
+          this.submitloading = false;
+          return;
+        }
+        let currentData = {
+          id: this.infos.current.id,
+          categoryName: this.formLabelAlign.region
+        };
+
+        EditCategory(currentData)
+          .then(Response => {
+            this.$message({
+              type: "success",
+              message: Response.data.message
+            });
+
+            this.infos.current.category_name =
+              Response.data.data.data.categoryName;
+
+            // this.infos.current = [];
+            // this.formLabelAlign.name = "";
+            this.submitloading = false;
           })
-         
+          .catch(error => {
+            this.submitloading = false;
+          });
       }
     },
     firstItem(s) {
@@ -201,7 +248,32 @@ export default {
         fn: this.deleteCategory
       });
     },
+    deleteSecondConfirm(cateid) {
+      this.categoryId = cateid;
+      this.confirm({
+        content: "确认删除？",
+        fn: this.deleteSecondCategory
+      });
+    },
+    deleteSecondCategory() {
+      DeleteCategory({
+        categoryId: this.categoryId
+      })
+        .then(res => {
+          this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
 
+          // this.infos.items = this.infos.items.filter(item => {
+          //   return item.id != this.categoryId;
+          // });
+
+          this.categoryId = "";
+          this.getCategoryAll();
+        })
+        .catch(error => {});
+    },
     editFirst(data) {
       this.subtype = data.type;
       this.second_input = false;
@@ -210,6 +282,7 @@ export default {
       this.formLabelAlign.name = data.data.category_name;
       this.infos.current = data.data;
       this.submitloading = false;
+      this.first_input = true;
     },
     editCategory() {
       if (this.infos.current.length == 0) {
@@ -217,8 +290,18 @@ export default {
           type: "warning",
           message: "未选择分类！"
         });
+        this.submitloading = false;
         return;
       }
+      if (this.formLabelAlign.name.trim() === "") {
+        this.$message({
+          type: "warning",
+          message: "分类不能为空！"
+        });
+        this.submitloading = false;
+        return;
+      }
+
       let currentData = {
         id: this.infos.current.id,
         categoryName: this.formLabelAlign.name
@@ -237,17 +320,31 @@ export default {
           // this.formLabelAlign.name = "";
           this.submitloading = false;
         })
-        .catch(error => {});
+        .catch(error => {
+          this.submitloading = false;
+        });
     },
     addSon(parms) {
       this.subtype = parms.type;
       this.formLabelAlign.name = parms.data.category_name;
+      this.formLabelAlign.region = "";
       this.first_input = true;
       this.first_input_dis = true;
       this.second_input = true;
       this.butdis = false;
       this.second_input_dis = false;
       this.infos.current = parms.data;
+    },
+    editSecond(parms) {
+      console.log(parms);
+      this.subtype = parms.type;
+      this.first_input = false;
+      this.second_input = true;
+      this.second_input_dis = false;
+      this.infos.current = parms.data;
+      this.formLabelAlign.region = parms.data.category_name;
+      // console.log( this.infos.current);
+      this.butdis = false;
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
