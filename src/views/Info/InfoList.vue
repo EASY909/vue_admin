@@ -75,6 +75,9 @@
         <template slot-scope="scope">
           <el-button type="danger" size="medium" @click="deleteItem(scope.row)">删除</el-button>
           <el-button type="success" size="medium" @click="edit(scope.row.id)">编辑</el-button>
+          <!-- <router-link :to="{name:'InfoDetail'}"> -->
+          <el-button type="primary" size="medium" @click="detail(scope.row.id)">编辑详情</el-button>
+          <!-- </router-link> -->
         </template>
       </el-table-column>
     </el-table>
@@ -98,8 +101,13 @@
       </el-col>
     </el-row>
 
-    <DialogInfo :flag.sync="dialog_info" :infocategory="options.category" />
-    <DialogInfoEdit :editId="editId" @getList="getList" :flag.sync="dialog_info_edit" :infocategory="options.category" />
+    <DialogInfo :flag.sync="dialog_info" @getList="getList" :infocategory="options.category" />
+    <DialogInfoEdit
+      :editId="editId"
+      @getList="getList"
+      :flag.sync="dialog_info_edit"
+      :infocategory="options.category"
+    />
   </div>
 </template>
 
@@ -113,7 +121,7 @@ import { timestampToTime } from "@/utils/validate.js";
 export default {
   name: "InfoList",
   //import引入的组件需要注入到对象中才能使用
-  components: { DialogInfo ,DialogInfoEdit},
+  components: { DialogInfo, DialogInfoEdit },
   data() {
     //这里存放数据
     return {
@@ -147,7 +155,7 @@ export default {
       },
       loading: false,
       deInfoId: [],
-      editId:""
+      editId: ""
     };
   },
   //监听属性 类似于data概念
@@ -275,10 +283,17 @@ export default {
         this.deInfoId.push(item.id);
       });
     },
-    edit(val){
-     
-      this.editId=val;
-      this.dialog_info_edit=true
+    edit(val) {
+      this.editId = val;
+      this.dialog_info_edit = true;
+    },
+    detail(id) {
+      this.$router.push({
+        name: "InfoDetail",
+        query: {
+          id: id
+        }
+      });
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）

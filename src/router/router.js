@@ -74,6 +74,15 @@ export default new Router({
           },
           component: () => import('../views/Info/InfoCategory')
         },
+        {
+          path: '/infodetail',
+          name: 'InfoDetail',
+          hidden: true,
+          meta: {
+            name: "信息详情"
+          },
+          component: () => import('../views/Info/InfoDetail')
+        },
       ]
     },
     {
