@@ -99,6 +99,7 @@ export default {
           this.form.categroy = "";
           // close();
           this.subloading = false;
+           this.$emit("getList", false);
         })
         .catch(error => {
           this.subloading = false;
