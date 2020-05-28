@@ -16,18 +16,7 @@
         <el-input v-model="form.title"></el-input>
       </el-form-item>
       <el-form-item label="缩略图">
-        <!-- <UploadImg :imgUrl.sync="form.imgUrl" :config="uploadImgConfig" /> -->
-        <el-upload
-          class="avatar-uploader"
-          action="http://up-z2.qiniup.com"
-          :data="data.uploadKey"
-          :show-file-list="false"
-          :on-success="handleAvatarSuccess"
-          :before-upload="beforeAvatarUpload"
-        >
-          <img v-if="form.imgUrl" :src="form.imgUrl" class="avatar" />
-          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-        </el-upload>
+        <UploadImg :imgUrl.sync="form.imgUrl" />
       </el-form-item>
 
       <el-form-item label="发布日期">
@@ -36,7 +25,6 @@
 
       <el-form-item label="详细内容">
         <quillEditor v-model="form.content" ref="myQuillEditor" :options="data.editorOption" />
-
         <!-- <el-date-picker v-model="form.date" type="date" disabled placeholder="选择日期"></el-date-picker> -->
       </el-form-item>
 
@@ -53,7 +41,7 @@
 import { GetList, EdidInfo } from "@/api/news.js";
 import { timestampToTime } from "@/utils/validate.js";
 import { quillEditor } from "vue-quill-editor";
-// import UploadImg from "@c/uploadimg";
+import UploadImg from "@c/uploadimg";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import "quill/dist/quill.bubble.css";
@@ -62,8 +50,8 @@ export default {
   name: "InfoDetail",
   //import引入的组件需要注入到对象中才能使用
   components: {
-    quillEditor
-    // UploadImg
+    quillEditor,
+    UploadImg
   },
   data() {
     //这里存放数据
@@ -131,47 +119,12 @@ export default {
           });
         })
         .catch(error => {});
-    },
-
-    handleAvatarSuccess(res, file) {
-      let image = `http://images.easy909.xyz/${res.key}`;
-      this.form.imgUrl = image;
-      // emit("update:imgUrl", image);
-  
-    },
-    beforeAvatarUpload(file) {
-      const isJPG = file.type === "image/jpeg";
-      const isLt2M = file.size / 1024 / 1024 < 2;
-      if (!isJPG) {
-        root.$message.error("上传头像图片只能是 JPG 格式!");
-      }
-      if (!isLt2M) {
-        root.$message.error("上传头像图片大小不能超过 2MB!");
-      }
-      // 文件名转码
-      let suffix = file.name;
-      let key = encodeURI(`${suffix}`);
-      this.data.uploadKey.key = key;
-      return isJPG && isLt2M;
-    },
-    getqiniu() {
-      let requestData = {
-        accesskey: "HdkslDVZsZ6f4WCk1-F9fMgK95SBAM6xx4wNeVSF",
-        secretkey: "5hvLK4W2alZ8ttHCSC6YxffAcPzu7XiRRV5TwLre",
-        buckety: "imgeasy909"
-      };
-      this.qiniuToken(requestData)
-        .then(res => {
-          this.data.uploadKey.token = res.data.data.token;
-        })
-        .catch(error => {});
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
   created() {
     this.GetCategory();
     this.getInfo();
-    this.getqiniu();
   },
   //生命周期 - 挂载完成（可以访问DOM元素）
   mounted() {},
