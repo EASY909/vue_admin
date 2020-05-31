@@ -8,10 +8,10 @@
             <div class="label-wrap search_key">
               <label for>关键字：&nbsp;&nbsp;</label>
               <div class="wrap-content">
-                <Select  :config="data.configOption" />
+                <Select :config="data.configOption" />
                 <!-- <el-select placeholder="请选择">
                   <el-option></el-option>
-                </el-select> -->
+                </el-select>-->
               </div>
             </div>
           </el-col>
@@ -23,22 +23,45 @@
           </el-col>
         </el-row>
       </el-col>
-
       <el-col :span="4">
         <el-button type="danger" @click="dialogInfo=true" class="pull-right">添加用户</el-button>
       </el-col>
     </el-row>
+
+    <div class="black-space-30"></div>
+    <Table :config="data.configTable">
+      <template v-slot:status="slotData">
+        <el-switch
+          @change="handlerChange(slotData.data)"
+          v-model="slotData.data.status"
+          active-color="#13ce66"
+          inactive-value="1"
+          active-value="2"
+          inactive-color="#ff4949"
+        ></el-switch>
+      </template>
+
+      <template v-slot:operation="slotData">
+        {{slotData.data.username}}
+        <el-button type="danger" @click="operation(slotData.data.id)">删除</el-button>
+        <el-button type="success" @click="handlerEdit(slotData.data)">编辑</el-button>
+      </template>
+    </Table>
   </div>
 </template>
 
 <script>
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
-import Select from "@c/select"
+import Select from "@c/select";
+import Table from "@c/table";
+import {RequestUrl} from "@/api/requestUrl.js"
 export default {
   //import引入的组件需要注入到对象中才能使用
   components: {
-      Select  },
+    Select,
+    Table
+  },
   data() {
     //这里存放数据
     return {
@@ -85,11 +108,11 @@ export default {
             }
           ],
           requestUrlData: {
-            // url: RequestUrl.getUserList,
+            url: RequestUrl.getUserList,
             method: "post",
             data: {
               pageNumber: 1,
-              pageSize: 10
+              pageSize: 5
             }
           },
           pagination: true
@@ -110,7 +133,11 @@ export default {
   //监控data中的数据变化
   watch: {},
   //方法集合
-  methods: {},
+  methods: {
+    operation() {},
+    handlerEdit() {},
+    handlerChange() {}
+  },
   //生命周期 - 创建完成（可以访问当前this实例）
   created() {},
   //生命周期 - 挂载完成（可以访问DOM元素）

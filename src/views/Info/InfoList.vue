@@ -67,10 +67,10 @@
     <el-table :data="tableData" @selection-change="handleSelectionChange">
       border style="width: 100%" v-loading="loading">
       <el-table-column type="selection" width="45"></el-table-column>
-      <el-table-column prop="title" label="标题" width="700"></el-table-column>
+      <el-table-column prop="title" label="标题" width="500"></el-table-column>
       <el-table-column prop="categoryId" label="类别" width="130" :formatter="toCate"></el-table-column>
-      <el-table-column prop="createDate" label="日期" width="137" :formatter="toDate"></el-table-column>
-      <el-table-column prop="user" label="管理员" width="200"></el-table-column>
+      <el-table-column prop="createDate" label="日期" width="130" :formatter="toDate"></el-table-column>
+      <el-table-column prop="user" label="管理员" width="300"></el-table-column>
       <el-table-column prop="option" label="操作">
         <template slot-scope="scope">
           <el-button type="danger" size="medium" @click="deleteItem(scope.row)">删除</el-button>
