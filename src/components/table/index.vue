@@ -112,7 +112,6 @@ export default {
       this.data.requestData = JSON.parse(
         JSON.stringify(this.data.tableConfig.requestUrlData)
       );
-      console.log(this.data.requestData);
     },
     tableSelectBox() {}
   },

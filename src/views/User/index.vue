@@ -47,6 +47,7 @@
         <el-button type="success" @click="handlerEdit(slotData.data)">编辑</el-button>
       </template>
     </Table>
+    <Dialog  :flag.sync="dialogInfo" />
   </div>
 </template>
 
@@ -55,12 +56,14 @@
 //例如：import 《组件名称》 from '《组件路径》';
 import Select from "@c/select";
 import Table from "@c/table";
+import Dialog from "./dialog/info"
 import {RequestUrl} from "@/api/requestUrl.js"
 export default {
   //import引入的组件需要注入到对象中才能使用
   components: {
     Select,
-    Table
+    Table,
+    Dialog
   },
   data() {
     //这里存放数据
@@ -125,7 +128,8 @@ export default {
             lable: "1"
           }
         ]
-      }
+      },
+      dialogInfo:false
     };
   },
   //监听属性 类似于data概念
