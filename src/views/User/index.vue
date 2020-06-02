@@ -29,7 +29,7 @@
     </el-row>
 
     <div class="black-space-30"></div>
-    <Table :config="data.configTable">
+    <Table ref="Table" :config="data.configTable">
       <template v-slot:status="slotData">
         <el-switch
           @change="handlerChange(slotData.data)"
@@ -42,12 +42,12 @@
       </template>
 
       <template v-slot:operation="slotData">
-        {{slotData.data.username}}
+        <!-- {{slotData.data.username}} -->
         <el-button type="danger" @click="operation(slotData.data.id)">删除</el-button>
         <el-button type="success" @click="handlerEdit(slotData.data)">编辑</el-button>
       </template>
     </Table>
-    <Dialog  :flag.sync="dialogInfo" />
+    <Dialog @loadTable="loadTable" :flag.sync="dialogInfo" />
   </div>
 </template>
 
@@ -56,8 +56,9 @@
 //例如：import 《组件名称》 from '《组件路径》';
 import Select from "@c/select";
 import Table from "@c/table";
-import Dialog from "./dialog/info"
-import {RequestUrl} from "@/api/requestUrl.js"
+import Dialog from "./dialog/info";
+import { RequestUrl } from "@/api/requestUrl.js";
+import { UserActives } from "@/api/user";
 export default {
   //import引入的组件需要注入到对象中才能使用
   components: {
@@ -129,7 +130,7 @@ export default {
           }
         ]
       },
-      dialogInfo:false
+      dialogInfo: false
     };
   },
   //监听属性 类似于data概念
@@ -140,7 +141,26 @@ export default {
   methods: {
     operation() {},
     handlerEdit() {},
-    handlerChange() {}
+    handlerChange(data) {
+      let resData = {
+        id: data.id,
+        status: data.status
+      };
+      UserActives(resData)
+        .then(res => {
+          this.$message({
+            message: res.data.message,
+            type: "success"
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        });
+      // console.log(data);
+    },
+    loadTable() {
+      this.$refs.Table.tableLoadData();
+    }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
   created() {},

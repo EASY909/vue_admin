@@ -22,6 +22,7 @@ const loadTableData = {
          
             loadTable(requestData).then(res => {
                 let tdata = res.data.data;
+                console.log(tdata);
                 this.data.tableData = tdata.data;
                 this.total = tdata.total;
                

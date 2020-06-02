@@ -72,7 +72,13 @@ const cityPicker = {
             for (const key in this.resultData) {
                 this.resultData[key] = this.data[key]
             }
-        
+
+        },
+        clearData() {
+            this.data.streetValue = "";
+            this.data.provinceValue = "";
+            this.data.cityValue = "";
+            this.data.areaValue = "";
         }
     }
 }

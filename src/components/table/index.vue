@@ -28,7 +28,7 @@
         ></el-table-column>
       </template>
     </el-table>
-
+    <div class="black-space-30"></div>
     <el-pagination
       v-if="data.tableConfig.pagination"
       @size-change="handleSizeChange"
@@ -89,8 +89,7 @@ export default {
             role: "超管"
           }
         ],
-        requestData: {},
-        
+        requestData: {}
       }
     };
   },
