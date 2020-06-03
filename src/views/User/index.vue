@@ -29,7 +29,7 @@
     </el-row>
 
     <div class="black-space-30"></div>
-    <Table ref="Table" :config="data.configTable">
+    <Table ref="Table" :config="data.configTable" :tableRow.sync="data.tableRow">
       <template v-slot:status="slotData">
         <el-switch
           @change="handlerChange(slotData.data)"
@@ -46,8 +46,13 @@
         <el-button type="danger" @click="operation(slotData.data.id)">删除</el-button>
         <el-button type="success" @click="handlerEdit(slotData.data)">编辑</el-button>
       </template>
+
+      <template v-slot:tableFooterLeft>
+        <el-button @click="batchDel" type="danger">批量删除</el-button>
+      </template>
     </Table>
     <Dialog @loadTable="loadTable" :flag.sync="dialogInfo" />
+    <!-- <A a="12" b="qc" /> -->
   </div>
 </template>
 
@@ -57,14 +62,18 @@
 import Select from "@c/select";
 import Table from "@c/table";
 import Dialog from "./dialog/info";
+// import A from "./dialog/Attrs"
 import { RequestUrl } from "@/api/requestUrl.js";
-import { UserActives } from "@/api/user";
+import { UserActives, UserDel } from "@/api/user";
+//bus
+// import EventBus from "@/utils/bus.js";
 export default {
   //import引入的组件需要注入到对象中才能使用
   components: {
     Select,
     Table,
-    Dialog
+    Dialog,
+    A
   },
   data() {
     //这里存放数据
@@ -139,8 +148,34 @@ export default {
   watch: {},
   //方法集合
   methods: {
-    operation() {},
-    handlerEdit() {},
+    operation(id) {
+      this.confirm({
+        content: "确认删除？",
+        fn: this.userDel,
+        data: [id]
+      });
+    },
+    userDel(data) {
+      let resData = {
+        id: [data][0]
+      };
+      // console.log(resData);
+      UserDel(resData)
+        .then(res => {
+          let resData = res.data;
+          this.$message({
+            message: resData.message,
+            type: "success"
+          });
+          this.loadTable();
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    handlerEdit(data) {
+      console.log(data);
+    },
     handlerChange(data) {
       let resData = {
         id: data.id,
@@ -160,10 +195,25 @@ export default {
     },
     loadTable() {
       this.$refs.Table.tableLoadData();
+    },
+    batchDel() {
+      if (this.data.tableRow.idItem) {
+        this.confirm({
+          content: "确认删除？",
+          fn: this.userDel,
+          data: this.data.tableRow.idItem
+        });
+      }
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
-  created() {},
+  created() {
+    // EventBus.$on("busFn",(data)=>{
+    //   console.log(data);
+    // })
+
+    // console.log(this.$children);
+  },
   //生命周期 - 挂载完成（可以访问DOM元素）
   mounted() {},
   beforeCreate() {}, //生命周期 - 创建之前

@@ -118,6 +118,8 @@ import DialogInfo from "./dialog/info";
 import DialogInfoEdit from "./dialog/edit";
 import { GetList, DeleteInfo } from "@/api/news.js";
 import { timestampToTime } from "@/utils/validate.js";
+//bus
+// import EventBus from "@/utils/bus.js";
 export default {
   name: "InfoList",
   //import引入的组件需要注入到对象中才能使用
@@ -274,7 +276,7 @@ export default {
       let data = this.options.category.filter((item, index) => {
         return item.id === row.categoryId;
       });
-      console.log(data);
+    
       return data[0].category_name;
     },
     handleSelectionChange(val) {
@@ -300,6 +302,8 @@ export default {
   created() {
     this.GetCategory();
     this.getList();
+
+    // EventBus.$emit("busFn",this.data)
   },
   //生命周期 - 挂载完成（可以访问DOM元素）
   mounted() {},

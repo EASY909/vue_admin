@@ -29,17 +29,28 @@
       </template>
     </el-table>
     <div class="black-space-30"></div>
-    <el-pagination
-      v-if="data.tableConfig.pagination"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="currentPage"
-      :page-sizes="pageSizes"
-      :page-size="pageSize"
-      background
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="total"
-    ></el-pagination>
+
+    <div class="table-footer">
+      <el-row>
+        <el-col :span="4">
+          <slot name="tableFooterLeft"></slot>
+        </el-col>
+        <el-col :span="20">
+          <el-pagination
+            v-if="data.tableConfig.pagination"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="pageSizes"
+            :page-size="pageSize"
+            background
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="total"
+            class="pull-right"
+          ></el-pagination>
+        </el-col>
+      </el-row>
+    </div>
   </div>
 </template>
 
@@ -60,6 +71,10 @@ export default {
     config: {
       type: Object,
       default: () => {}
+    },
+    tableRow: {
+      type: Object,
+      default: () => {}
     }
   },
   data() {
@@ -73,22 +88,7 @@ export default {
           requestUrlData: {},
           pagination: false
         },
-        tableData: [
-          {
-            username: "1730127479@qq.com",
-            truename: "王小虎",
-            phone: "17805012035",
-            region: "安徽",
-            role: "超管"
-          },
-          {
-            username: "1730127479@qq.com",
-            truename: "秦小虎",
-            phone: "17805012035",
-            region: "安徽",
-            role: "超管"
-          }
-        ],
+        tableData: [],
         requestData: {}
       }
     };
@@ -112,7 +112,12 @@ export default {
         JSON.stringify(this.data.tableConfig.requestUrlData)
       );
     },
-    tableSelectBox() {}
+    tableSelectBox(val) {
+      let rowData={
+        idItem: val.map((item, index) => item.id)
+      }
+      this.$emit("update:tableRow", rowData);
+    }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
   created() {
