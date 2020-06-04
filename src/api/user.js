@@ -22,7 +22,7 @@ export function getCityPicker(data) {
 /**
  * 角色列表
  */
-export function GetRole(data = {}){
+export function GetRole(data = {}) {
     return service.request({
         method: "post",
         url: "/role/",
@@ -33,7 +33,7 @@ export function GetRole(data = {}){
 /**
  * 系统列表
  */
-export function GetSystem(data = {}){
+export function GetSystem(data = {}) {
     return service.request({
         method: "post",
         url: "/system/",
@@ -45,7 +45,7 @@ export function GetSystem(data = {}){
 /**
  * 列表
  */
-export function UserAdd(data = {}){
+export function UserAdd(data = {}) {
     return service.request({
         method: "post",
         url: "/user/add/",
@@ -56,7 +56,7 @@ export function UserAdd(data = {}){
 /**
  * 删除用户
  */
-export function UserDel(data){
+export function UserDel(data) {
     return service.request({
         method: "post",
         url: "/user/delete/",
@@ -67,7 +67,7 @@ export function UserDel(data){
 /**
  * 用户禁启用
  */
-export function UserActives(data){
+export function UserActives(data) {
     return service.request({
         method: "post",
         url: "/user/actives/",
@@ -78,7 +78,7 @@ export function UserActives(data){
 /**
  * 用户编辑
  */
-export function UserEdit(data){
+export function UserEdit(data) {
     return service.request({
         method: "post",
         url: "/user/edit/",
@@ -89,10 +89,27 @@ export function UserEdit(data){
 /**
  * 按钮权限
  */
-export function GetPermButton(data){
+export function GetPermButton(data) {
     return service.request({
         method: "post",
         url: "/permButton/",
+        data
+    })
+}
+/**
+ * 用户列表
+ */
+export function GetList(data) {
+    return service.request({
+        method: "post",
+        url: "/user/getList/",
+        data
+    })
+}
+export function UserRole(data = {}) {
+    return service.request({
+        method: "post",
+        url: "/userRole/",
         data
     })
 }

@@ -6,9 +6,15 @@ const state = {
     // access_level: "" || sessionStorage.getItem("access_level"),
     username: getUserName() || "",
     to_Ken: '',
+    roles: [],
+    buttonPermission:[]
+
 }
 const getters = {
     isCollapse: state => state.isCollapse,
+    roles: state => {
+        return state.roles;
+    },
     // access_level: state => state.access_level
 }
 
@@ -29,6 +35,16 @@ const mutations = {
     },
     REMOVE_TOKEN(state) {
         state.to_Ken = '';
+    },
+    SET_ROLES(state, value) {
+        state.roles = value;
+    },
+    REMOVE_ROLES(state) {
+        state.roles = [];
+    },
+    SET_BUTTON(state,value){
+        state.buttonPermission = value;
+        console.log(state.buttonPermission );
     }
     // setAccess_level(state, value) {
     //     sessionStorage.setItem("access_level", value)
@@ -38,12 +54,12 @@ const mutations = {
 }
 const actions = {
     login({ commit }, requestData) {
-    
+
         // console.log(content)
         return new Promise((resolve, reject) => {
             Login(requestData).then(response => {
                 let data = response.data.data;
-                console.log(data);
+
                 commit("SET_USERNAME", data.username);
                 commit("SET_TOKEN", data.token);
                 // commit("setAccess_level", resonse.data);
@@ -53,7 +69,7 @@ const actions = {
 
                 resolve(response);
             }).catch(error => {
-              
+
                 reject(error)
             })
         })
@@ -65,7 +81,7 @@ const actions = {
             // commit("setAccess_level", "");
             commit('REMOVE_USERNAME');
             commit('REMOVE_TOKEN');
-
+            commit('REMOVE_ROLES');
             resolve();
         })
     }

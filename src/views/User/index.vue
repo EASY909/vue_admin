@@ -8,18 +8,25 @@
             <div class="label-wrap search_key">
               <label for>关键字：&nbsp;&nbsp;</label>
               <div class="wrap-content">
-                <Select :config="data.configOption" />
                 <!-- <el-select placeholder="请选择">
                   <el-option></el-option>
                 </el-select>-->
+                <el-select v-model="search_key" placeholder="请选择">
+                  <el-option
+                    v-for="item in options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
               </div>
             </div>
           </el-col>
           <el-col :span="6">
-            <el-input v-model="data.search_keyWork" style="width:100%" placeholder="请输入内容"></el-input>
+            <el-input v-model="search_keyWork" style="width:100%" placeholder="请输入内容"></el-input>
           </el-col>
           <el-col :span="3">
-            <el-button type="danger">搜索</el-button>
+            <el-button type="danger" @click="search">搜索</el-button>
           </el-col>
         </el-row>
       </el-col>
@@ -51,7 +58,7 @@
         <el-button @click="batchDel" type="danger">批量删除</el-button>
       </template>
     </Table>
-    <Dialog @loadTable="loadTable" :flag.sync="dialogInfo" />
+    <Dialog @loadTable="loadTable" :editData.sync="data.editData" :flag.sync="dialogInfo" />
     <!-- <A a="12" b="qc" /> -->
   </div>
 </template>
@@ -64,7 +71,8 @@ import Table from "@c/table";
 import Dialog from "./dialog/info";
 // import A from "./dialog/Attrs"
 import { RequestUrl } from "@/api/requestUrl.js";
-import { UserActives, UserDel } from "@/api/user";
+import { UserActives, UserDel, GetList } from "@/api/user";
+import { debounce } from "@/utils/validate.js";
 //bus
 // import EventBus from "@/utils/bus.js";
 export default {
@@ -72,16 +80,26 @@ export default {
   components: {
     Select,
     Table,
-    Dialog,
-    A
+    Dialog
   },
   data() {
     //这里存放数据
     return {
+      search_key: "",
+      search_keyWork: "",
+      options: [
+        {
+          value: "username",
+          label: "用户名"
+        },
+        {
+          value: "phone",
+          label: "手机号"
+        }
+      ],
       data: {
         tableRow: {},
         editData: {},
-        configOption: ["name", "phone"],
         configTable: {
           tSelect: true,
           recordBox: true,
@@ -125,19 +143,14 @@ export default {
             method: "post",
             data: {
               pageNumber: 1,
-              pageSize: 5
+              pageSize: 5,
+              username: "",
+              truename: "",
+              phone: ""
             }
           },
           pagination: true
-        },
-        search_key: "",
-        search_keyWork: "",
-        options: [
-          {
-            value: "2",
-            lable: "1"
-          }
-        ]
+        }
       },
       dialogInfo: false
     };
@@ -173,10 +186,7 @@ export default {
           console.log(error);
         });
     },
-    handlerEdit(data) {
-      console.log(data);
-    },
-    handlerChange(data) {
+    handlerChange: debounce(function(data) {
       let resData = {
         id: data.id,
         status: data.status
@@ -191,8 +201,8 @@ export default {
         .catch(error => {
           console.log(error);
         });
-      // console.log(data);
-    },
+    }, 300),
+
     loadTable() {
       this.$refs.Table.tableLoadData();
     },
@@ -204,6 +214,45 @@ export default {
           data: this.data.tableRow.idItem
         });
       }
+    },
+    search() {
+      let resData = null;
+
+      switch (this.search_key) {
+        case "username":
+          resData = {
+            username: this.search_keyWork,
+            truename: "",
+            phone: "",
+            pageNumber: 1,
+            pageSize: 5
+          };
+          break;
+        case "phone":
+          resData = {
+            username: "",
+            truename: "",
+            phone: this.search_keyWork,
+            pageNumber: 1,
+            pageSize: 5
+          };
+          break;
+      }
+      if (!resData) {
+        this.$message({
+          message: "请选择关键字！",
+          type: "success"
+        });
+        return;
+      }
+      this.data.configTable.requestUrlData.data = resData;
+    },
+    handlerEdit(data){
+  
+      this.dialogInfo=true
+      this.data.editData=data;
+      
+      
     }
   },
   //生命周期 - 创建完成（可以访问当前this实例）
@@ -211,7 +260,6 @@ export default {
     // EventBus.$on("busFn",(data)=>{
     //   console.log(data);
     // })
-
     // console.log(this.$children);
   },
   //生命周期 - 挂载完成（可以访问DOM元素）

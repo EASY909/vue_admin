@@ -35,27 +35,28 @@
           <el-checkbox :key="item.id" v-for="item in data.roleItem" :label="item.role">{{item.name}}</el-checkbox>
         </el-checkbox-group>
       </el-form-item>
-    </el-form>
-    <!-- <el-form-item label="按钮" prop="btnPrem" :label-width="formLabelWidth">
-      <template v-if="data.btnPrem.length>0">
-        <template v-for="(item,index) in data.btnPrem">
-          <h4>{{item.name}}</h4>
-          <template v-if="item.perm&&item.perm.length>0">
-            <el-checkbox-group v-model="data.form.btnPrem" :key="index">
-              <el-checkbox
-                :key="buttons.value"
-                v-for="buttons in item.perm"
-                :label="buttons.value"
-              >{{buttons.name}}</el-checkbox>
-            </el-checkbox-group>
-          </template>
+
+      <el-form-item label="按钮" prop="btnPerm" :label-width="formLabelWidth">
+        <template v-if="data.btnPerm.length>0">
+          <div v-for="(item,index) in data.btnPerm" :key="index">
+            <h4>{{item.name}}</h4>
+            <template v-if="item.perm&&item.perm.length>0">
+              <el-checkbox-group v-model="form.btnPerm" :key="index">
+                <el-checkbox
+                  :key="buttons.value"
+                  v-for="buttons in item.perm"
+                  :label="buttons.value"
+                >{{buttons.name}}</el-checkbox>
+              </el-checkbox-group>
+            </template>
+          </div>
         </template>
-      </template>
-    </el-form-item>-->
+      </el-form-item>
+    </el-form>
 
     <div slot="footer" class="dialog-footer">
       <el-button @click="flag_self = false">取消</el-button>
-      <el-button type="danger" @click="submit" :loading="subloading">确定</el-button>
+      <el-button type="danger" @click="submit('form')" :loading="subloading">确定</el-button>
     </div>
   </el-dialog>
 </template>
@@ -64,7 +65,7 @@
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
 import CityPicker from "@c/citypicker/index.vue";
-import { GetRole, UserAdd } from "@/api/user";
+import { GetSystem, UserAdd, UserEdit, GetPermButton } from "@/api/user";
 export default {
   //import引入的组件需要注入到对象中才能使用
   name: "infoDialog",
@@ -73,6 +74,10 @@ export default {
     flag: {
       type: Boolean,
       default: false
+    },
+    editData: {
+      type: Object,
+      default: () => {}
     }
     // infocategory: {
     //   type: Array,
@@ -86,7 +91,7 @@ export default {
         cityPickData: {},
         roleStatus: "1",
         roleItem: [],
-        btnPrem: []
+        btnPerm: []
       },
       form: {
         username: "",
@@ -95,7 +100,7 @@ export default {
         phone: "",
         status: "1",
         role: [],
-        btnPrem: []
+        btnPerm: []
       },
       flag_self: false,
       formLabelWidth: "70px",
@@ -117,9 +122,10 @@ export default {
       this.$refs.form.resetFields();
       this.data.cityPickData = {};
       this.$refs.clearRegion.clearData();
+      this.$emit("update:editData", {});
     },
-    getRole() {
-      GetRole()
+    getSystem() {
+      GetSystem()
         .then(res => {
           let data = res.data.data;
           this.data.roleItem = data;
@@ -127,21 +133,82 @@ export default {
         .catch(error => {
           console.log(error);
         });
+
+      GetPermButton().then(res => {
+        this.data.btnPerm = res.data.data;
+      });
     },
     opened() {
-      this.getRole();
+      this.getSystem();
+      console.log(this.editData);
+      if (this.editData.id) {
+        console.log(1);
+        console.log(this.editData.role);
+        this.editData.role = this.editData.role
+          ? this.editData.role.split(",")
+          : []; // 数组
+        this.editData.btnPerm = this.editData.btnPerm
+          ? this.editData.btnPerm.split(",")
+          : []; // 数组
+        for (let key in this.editData) {
+          this.form[key] = this.editData[key];
+        }
+      } else {
+        console.log(2);
+        this.form.id && delete this.form.id;
+      }
     },
-    submit() {
-      let resData = {
-        username: this.form.username,
-        truename: this.form.truename,
-        password: this.form.password,
-        phone: this.form.phone,
-        region: this.data.cityPickData,
-        status: this.form.status,
-        role: this.form.role.join(","),
-        btnPerm: this.form.btnPerm
-      };
+    submit(formName) {
+      this.$refs[formName].validate(valid => {
+        // 表单验证通过
+        if (valid) {
+          // 数据处理
+          let requestData = Object.assign({}, this.form); //
+          console.log(requestData);
+          // requestData.role = requestData.role.join(); // 数组转字符串，默认以，号隔开
+          // requestData.btnPerm = requestData.btnPerm.join(); // 数组转字符串，默认以，号隔开
+          // requestData.region = JSON.stringify(data.cityPickerData);
+          // 添加状态：需要密码，并且加密码
+          // 编辑状态：值存在，需要密码，并且加密码；否删除
+          //   if (requestData.id) {
+          //     if (requestData.password) {
+          //       requestData.password = sha1(requestData.password);
+          //     } else {
+          //       delete requestData.password;
+          //     }
+          //     userEdit(requestData);
+          //   } else {
+          //     requestData.password = sha1(requestData.password);
+          //     userAdd(requestData);
+          //   }
+          // } else {
+          //   return false;
+          // }
+        }
+      });
+    },
+    editUser(resData) {
+      UserEdit(resData)
+        .then(res => {
+          if (res.data.resCode === 0) {
+            this.$message({
+              message: res.data.message,
+              type: "success"
+            });
+
+            this.$refs.form.resetFields();
+            this.data.cityPickData = {};
+            this.$refs.clearRegion.clearData();
+            this.flag_self = false;
+
+            this.$emit("loadTable");
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    addUser(resData) {
       UserAdd(resData)
         .then(res => {
           if (res.data.resCode === 0) {

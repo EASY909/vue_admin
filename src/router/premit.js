@@ -18,7 +18,28 @@ router.beforeEach((to, from, next) => {
             store.commit('login/REMOVE_USERNAME')
             next()
         } else {
-            next()
+
+            if (store.getters["login/roles"].length === 0) {
+                store.dispatch('permission/getRoutes').then(res => {
+                    let role=res.role;
+                    let button=res.button;
+               
+                    store.commit("login/SET_ROLES", role);
+                    store.commit("login/SET_BUTTON", button);
+                    store.dispatch('permission/createRouter', role).then(res => {
+                        let addRouters = store.getters["permission/addRouters"];
+                        let allRouters = store.getters["permission/allRouters"];
+                        router.options.routes = allRouters;
+                        router.addRoutes(addRouters);
+                        next({...to, replace: true})
+
+                    })
+
+                        // next({...to, replace: true})
+                })
+            } else {
+                next()
+            }
         }
 
         console.log("token");

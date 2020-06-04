@@ -96,7 +96,16 @@ export default {
   //监听属性 类似于data概念
   computed: {},
   //监控data中的数据变化
-  watch: {},
+  watch: {
+    "config.requestUrlData.data": function(nv, ov) {
+      console.log(111);
+      this.data.requestData = JSON.parse(
+        JSON.stringify(this.data.tableConfig.requestUrlData)
+      );
+      console.log(this.data.requestData);
+      this.tableLoadData();
+    }
+  },
   //方法集合
   methods: {
     initTable() {
@@ -113,9 +122,9 @@ export default {
       );
     },
     tableSelectBox(val) {
-      let rowData={
+      let rowData = {
         idItem: val.map((item, index) => item.id)
-      }
+      };
       this.$emit("update:tableRow", rowData);
     }
   },
