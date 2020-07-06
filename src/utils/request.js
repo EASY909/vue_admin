@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { Message } from 'element-ui';
-// import { getToken, getUserName } from './app'
+import { getToken, getUserName } from './app'
 const BASEURL = process.env.NODE_ENV === 'production' ? process.env.VUE_APP_API : process.env.VUE_APP_API;
 // const BASEURL=process.env.NODE_ENV === 'production' ?'':'/devApi';
 
@@ -12,8 +12,8 @@ const service = axios.create({
 service.interceptors.request.use(function (config) {
 
   // 在发送请求之前做些什么
-  // config.headers['Tokey'] = getToken();
-  // config.headers['UserName'] = getUserName();
+  config.headers['Tokey'] = getToken();
+  config.headers['UserName'] = getUserName();
   
   return config;
 }, function (error) {

@@ -1,7 +1,7 @@
 const path = require('path');
 module.exports = {
     // 基本路径
-    publicPath: process.env.NODE_ENV === 'production' ? '' : '/',
+    publicPath: process.env.NODE_ENV === 'production' ? '' : '/vue_admin',
     // 输出文件目录
     outputDir: process.env.NODE_ENV === 'production' ? 'build' : 'devdist',
     // eslint-loader 是否在保存的时候检查
@@ -65,7 +65,7 @@ module.exports = {
         hotOnly: false,
         proxy: {
             [process.env.VUE_APP_API]: {
-                target: 'http://www.web-jshtml.cn/dependenciesapi/token',
+                target: 'http://www.web-jshtml.cn/vue_admin_api/token',
                 changeOrigin: true,
                 pathRewrite: {
                     ['^' + process.env.VUE_APP_API]: ''

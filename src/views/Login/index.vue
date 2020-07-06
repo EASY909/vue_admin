@@ -212,7 +212,7 @@ export default {
       this.codeButtonStatus.status = true;
       this.codeButtonStatus.text = "发送中";
 
-      getSms({ username: this.ruleForm.username, model: this.model.value })
+      getSms({ username: this.ruleForm.username, model: this.model })
         .then(response => {
           let data = response.data;
           this.$message({
@@ -224,6 +224,7 @@ export default {
           this.countDown(10);
         })
         .catch(error => {
+          this.codeButtonStatus.status = false;
           console.log(error);
         });
     },
@@ -279,7 +280,7 @@ export default {
      */
     countDown(num) {
       if (this.timer) {
-        clearInterval(timer.value);
+        clearInterval(this.timer);
       }
       let time = num;
 
@@ -323,8 +324,9 @@ export default {
   height: 100vh;
   background: #344a5f;
   .login-wrap {
+    // transform: translateY(50%);
     width: 330px;
-    margin: 0 auto;
+    margin:0 auto;
     .menu-tab {
       text-align: center;
       li {
