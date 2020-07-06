@@ -3,6 +3,10 @@ import Router from 'vue-router'
 import Layout from "@/views/Layout/index.vue"
 
 Vue.use(Router)
+const originalPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
 
 
 export const defaultRouterMap = [
@@ -54,7 +58,8 @@ export const asnycRouterMap = [{
   meta: {
     system: 'infoSystem',
     name: "信息管理",
-    icon: "info"
+    icon: "info",
+
   },
   component: Layout,
   children: [
@@ -63,7 +68,8 @@ export const asnycRouterMap = [{
       name: 'InfoList',
       hidden: false,
       meta: {
-        name: "信息列表"
+        name: "信息列表",
+        keepAlive: true
       },
       component: () => import('../views/Info/InfoList')
     },
@@ -72,7 +78,8 @@ export const asnycRouterMap = [{
       name: 'InfoCategory',
       hidden: false,
       meta: {
-        name: "信息分类"
+        name: "信息分类",
+        keepAlive: true
       },
       component: () => import('../views/Info/InfoCategory')
     },
@@ -81,7 +88,8 @@ export const asnycRouterMap = [{
       name: 'InfoDetail',
       hidden: true,
       meta: {
-        name: "信息详情"
+        name: "信息详情",
+        keepAlive: true
       },
       component: () => import('../views/Info/InfoDetail')
     },
@@ -104,18 +112,60 @@ export const asnycRouterMap = [{
       name: 'UserList',
       hidden: false,
       meta: {
-        name: "用户列表"
+        name: "用户列表",
+        keepAlive: true
       },
       component: () => import('../views/User/index.vue')
     },
   ]
-}]
+}, {
+  path: '*',
+  hidden: true,
+  redirect: "/404index",
+  meta: {
+    name: "page404",
+  },
+  component: Layout,
+  children: [
+    {
+      path: '/404index',
+      hidden: true,
+      meta: {
+        name: "404页面"
+      },
+      component: () => import('../views/404page.vue')
+    },
+  ]
+}
+]
 
-export default new Router({
+const createRouter = () => new Router({
   mode: 'hash',
+  base:"vue_admin",
   scrollBehavior: () => ({ y: 0 }),
   routes: defaultRouterMap
-});
+})
+
+const router = createRouter()
+
+
+function resetRouter() {
+  const newRouter = createRouter()
+  router.matcher = newRouter.matcher // the relevant part
+}
+export {
+  resetRouter,
+  router
+}
+
+// export  router;
+
+// export default new Router({
+//   mode: 'hash',
+//   scrollBehavior: () => ({ y: 0 }),
+//   routes: defaultRouterMap
+// });
+
 
 // export default new Router({
 //   routes: [

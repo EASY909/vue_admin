@@ -1,7 +1,7 @@
 <!--  -->
 <template>
   <el-dialog title="新增" :visible.sync="flag_self" @close="close" @opened="opened" width="580px">
-    <el-form ref="form" :model="form">
+    <el-form ref="form" :model="form" :rules="data.rules">
       <el-form-item label="用户名" prop="username" :label-width="formLabelWidth">
         <el-input v-model="form.username" placeholder="请输入邮箱" autocomplete="off"></el-input>
       </el-form-item>
@@ -66,6 +66,12 @@
 //例如：import 《组件名称》 from '《组件路径》';
 import CityPicker from "@c/citypicker/index.vue";
 import { GetSystem, UserAdd, UserEdit, GetPermButton } from "@/api/user";
+import {
+  checkEmail,
+  checkPassword,
+  stripscript,
+  validateCode
+} from "@/utils/validate";
 export default {
   //import引入的组件需要注入到对象中才能使用
   name: "infoDialog",
@@ -79,19 +85,49 @@ export default {
       type: Object,
       default: () => {}
     }
-    // infocategory: {
-    //   type: Array,
-    //   default: []
-    // }
   },
   data() {
     //这里存放数据
+    let validateUsername = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("请输入用户名"));
+      } else if (checkEmail(value)) {
+        callback(new Error("用户名格式有误"));
+      } else {
+        callback(); //true
+      }
+    };
+    // 验证密码
+    let validatePassword = (rule, value, callback) => {
+      if (this.form.id && !value) {
+        callback();
+      }
+      if ((this.form.id && value) || !this.form.id) {
+        // 过滤后的数据
+        if (value) {
+          this.form.password = stripscript(value);
+          value = this.form.password;
+        }
+        if (value === "") {
+          callback(new Error("请输入密码"));
+        } else if (checkPassword(value)) {
+          callback(new Error("密码为6至20位数字+字母"));
+        } else {
+          callback();
+        }
+      }
+    };
     return {
       data: {
         cityPickData: {},
         roleStatus: "1",
         roleItem: [],
-        btnPerm: []
+        btnPerm: [],
+        rules: {
+          username: [{ validator: validateUsername, trigger: "blur" }],
+          password: [{ validator: validatePassword, trigger: "blur" }],
+          role: [{ required: true, message: "请选择角色", trigger: "change" }]
+        }
       },
       form: {
         username: "",
@@ -120,41 +156,39 @@ export default {
     close() {
       this.$emit("update:flag", false);
       this.$refs.form.resetFields();
-      this.data.cityPickData = {};
-      this.$refs.clearRegion.clearData();
+      // this.data.cityPickData = {};
+      // this.$refs.clearRegion.clearData();
       this.$emit("update:editData", {});
     },
     getSystem() {
-      GetSystem()
-        .then(res => {
-          let data = res.data.data;
-          this.data.roleItem = data;
-        })
-        .catch(error => {
-          console.log(error);
+      if (this.data.roleItem.length===0) {
+        GetSystem()
+          .then(res => {
+            let data = res.data.data;
+            this.data.roleItem = data;
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      }
+      if (this.data.btnPerm.length===0) {
+        GetPermButton().then(res => {
+          this.data.btnPerm = res.data.data;
         });
-
-      GetPermButton().then(res => {
-        this.data.btnPerm = res.data.data;
-      });
+      }
     },
     opened() {
       this.getSystem();
-      console.log(this.editData);
+
       if (this.editData.id) {
-        console.log(1);
-        console.log(this.editData.role);
-        this.editData.role = this.editData.role
-          ? this.editData.role.split(",")
-          : []; // 数组
-        this.editData.btnPerm = this.editData.btnPerm
-          ? this.editData.btnPerm.split(",")
-          : []; // 数组
         for (let key in this.editData) {
           this.form[key] = this.editData[key];
         }
+
+        this.form.role = this.form.role.split(",");
+        this.form.btnPerm = this.form.btnPerm.split(",");
+        this.data.cityPickData = JSON.parse(this.editData.region);
       } else {
-        console.log(2);
         this.form.id && delete this.form.id;
       }
     },
@@ -162,28 +196,21 @@ export default {
       this.$refs[formName].validate(valid => {
         // 表单验证通过
         if (valid) {
-          // 数据处理
+          this.form.region = "";
           let requestData = Object.assign({}, this.form); //
-          console.log(requestData);
-          // requestData.role = requestData.role.join(); // 数组转字符串，默认以，号隔开
-          // requestData.btnPerm = requestData.btnPerm.join(); // 数组转字符串，默认以，号隔开
-          // requestData.region = JSON.stringify(data.cityPickerData);
+          requestData.role = requestData.role.join(); // 数组转字符串，默认以，号隔开
+          requestData.btnPerm = requestData.btnPerm.join(); // 数组转字符串，默认以，号隔开
+          requestData.region = JSON.stringify(this.data.cityPickData);
+
           // 添加状态：需要密码，并且加密码
           // 编辑状态：值存在，需要密码，并且加密码；否删除
-          //   if (requestData.id) {
-          //     if (requestData.password) {
-          //       requestData.password = sha1(requestData.password);
-          //     } else {
-          //       delete requestData.password;
-          //     }
-          //     userEdit(requestData);
-          //   } else {
-          //     requestData.password = sha1(requestData.password);
-          //     userAdd(requestData);
-          //   }
-          // } else {
-          //   return false;
-          // }
+          if (requestData.id) {
+            this.editUser(requestData);
+          } else {
+            this.addUser(requestData);
+          }
+        } else {
+          console.log("error");
         }
       });
     },
@@ -195,12 +222,10 @@ export default {
               message: res.data.message,
               type: "success"
             });
-
             this.$refs.form.resetFields();
             this.data.cityPickData = {};
             this.$refs.clearRegion.clearData();
             this.flag_self = false;
-
             this.$emit("loadTable");
           }
         })
@@ -216,12 +241,10 @@ export default {
               message: res.data.message,
               type: "success"
             });
-
             this.$refs.form.resetFields();
             this.data.cityPickData = {};
             this.$refs.clearRegion.clearData();
             this.flag_self = false;
-
             this.$emit("loadTable");
           }
         })
@@ -230,17 +253,6 @@ export default {
         });
     }
   },
-  //生命周期 - 创建完成（可以访问当前this实例）
-  created() {},
-  //生命周期 - 挂载完成（可以访问DOM元素）
-  mounted() {},
-  beforeCreate() {}, //生命周期 - 创建之前
-  beforeMount() {}, //生命周期 - 挂载之前
-  beforeUpdate() {}, //生命周期 - 更新之前
-  updated() {}, //生命周期 - 更新之后
-  beforeDestroy() {}, //生命周期 - 销毁之前
-  destroyed() {}, //生命周期 - 销毁完成
-  activated() {} //如果页面有keep-alive缓存功能，这个函数会触发
 };
 </script>
 <style lang='scss' scoped>

@@ -23,6 +23,7 @@ const actions = {
                 let role = res.data.data;
              
                 // content.commit("SET_ROLES", role.role);
+                // console.log(role);
                 resolve(role)
             }).catch(error => {
                 console.log(error);
@@ -42,7 +43,8 @@ const actions = {
                         return item;
                     }
                 })
-
+                addRouters.push(asnycRouterMap[asnycRouterMap.length-1])
+           
             }
             content.commit("SET_ROUTER", addRouters);
             resolve()

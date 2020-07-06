@@ -70,13 +70,24 @@
       <el-table-column prop="title" label="标题" width="500"></el-table-column>
       <el-table-column prop="categoryId" label="类别" width="130" :formatter="toCate"></el-table-column>
       <el-table-column prop="createDate" label="日期" width="130" :formatter="toDate"></el-table-column>
-      <el-table-column prop="user" label="管理员" width="300"></el-table-column>
+      <!-- <el-table-column prop="user" label="管理员" width="300"></el-table-column> -->
       <el-table-column prop="option" label="操作">
         <template slot-scope="scope">
-          <el-button type="danger" size="medium" @click="deleteItem(scope.row)">删除</el-button>
-          <el-button type="success" size="medium" @click="edit(scope.row.id)">编辑</el-button>
+          <el-button
+            type="danger"
+            size="medium"
+            v-btnPerm="'info.delete'"
+            @click="deleteItem(scope.row)"
+          >删除</el-button>
+          <el-button
+            type="success"
+            size="medium"
+            v-btnPerm="'info.edit'"
+            @click="edit(scope.row.id)"
+          >编辑</el-button>
           <!-- <router-link :to="{name:'InfoDetail'}"> -->
           <el-button type="primary" size="medium" @click="detail(scope.row.id)">编辑详情</el-button>
+
           <!-- </router-link> -->
         </template>
       </el-table-column>
@@ -118,6 +129,7 @@ import DialogInfo from "./dialog/info";
 import DialogInfoEdit from "./dialog/edit";
 import { GetList, DeleteInfo } from "@/api/news.js";
 import { timestampToTime } from "@/utils/validate.js";
+import EventBus from "@/utils/bus.js";
 //bus
 // import EventBus from "@/utils/bus.js";
 export default {
@@ -175,10 +187,6 @@ export default {
       this.getList();
     },
     search() {
-      console.log(this.typeValue);
-      console.log(this.dateValue);
-      console.log(this.search_key);
-      console.log(this.search_keyWork);
       let resData = {};
       if (this.search_key === "id") {
         resData = {
@@ -276,7 +284,7 @@ export default {
       let data = this.options.category.filter((item, index) => {
         return item.id === row.categoryId;
       });
-    
+      if (data.length === 0) return;
       return data[0].category_name;
     },
     handleSelectionChange(val) {
@@ -302,18 +310,12 @@ export default {
   created() {
     this.GetCategory();
     this.getList();
-
+    EventBus.$on("busFn",()=>{
+      this.getList();
+    })
     // EventBus.$emit("busFn",this.data)
   },
-  //生命周期 - 挂载完成（可以访问DOM元素）
-  mounted() {},
-  beforeCreate() {}, //生命周期 - 创建之前
-  beforeMount() {}, //生命周期 - 挂载之前
-  beforeUpdate() {}, //生命周期 - 更新之前
-  updated() {}, //生命周期 - 更新之后
-  beforeDestroy() {}, //生命周期 - 销毁之前
-  destroyed() {}, //生命周期 - 销毁完成
-  activated() {} //如果页面有keep-alive缓存功能，这个函数会触发
+
 };
 </script>
 <style lang='scss' scoped>

@@ -98,11 +98,11 @@ export default {
   //监控data中的数据变化
   watch: {
     "config.requestUrlData.data": function(nv, ov) {
-      console.log(111);
+    
       this.data.requestData = JSON.parse(
         JSON.stringify(this.data.tableConfig.requestUrlData)
       );
-      console.log(this.data.requestData);
+    
       this.tableLoadData();
     }
   },

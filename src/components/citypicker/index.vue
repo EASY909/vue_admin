@@ -80,10 +80,6 @@ export default {
   computed: {},
   //监控data中的数据变化
   watch: {
-    //   resultData(nv,ov){
-    //       console.log(nv);
-    //       this.emit("update:cityPickData", resultData);
-    //   }
       resultData:{
           handler(nv,ov){
               this.$emit("update:cityPickData", this.resultData);

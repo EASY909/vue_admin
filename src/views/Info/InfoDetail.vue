@@ -45,7 +45,7 @@ import UploadImg from "@c/uploadimg";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import "quill/dist/quill.bubble.css";
-
+import EventBus from "@/utils/bus.js";
 export default {
   name: "InfoDetail",
   //import引入的组件需要注入到对象中才能使用
@@ -117,6 +117,7 @@ export default {
             message: Response.data.message,
             type: "success"
           });
+           EventBus.$emit("busFn")
         })
         .catch(error => {});
     }
@@ -125,16 +126,12 @@ export default {
   created() {
     this.GetCategory();
     this.getInfo();
+
   },
   //生命周期 - 挂载完成（可以访问DOM元素）
-  mounted() {},
-  beforeCreate() {}, //生命周期 - 创建之前
-  beforeMount() {}, //生命周期 - 挂载之前
-  beforeUpdate() {}, //生命周期 - 更新之前
-  updated() {}, //生命周期 - 更新之后
-  beforeDestroy() {}, //生命周期 - 销毁之前
-  destroyed() {}, //生命周期 - 销毁完成
-  activated() {} //如果页面有keep-alive缓存功能，这个函数会触发
+  activated() {
+    this.getInfo();
+  }
 };
 </script>
 <style lang='scss' >

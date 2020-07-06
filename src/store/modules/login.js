@@ -7,7 +7,7 @@ const state = {
     username: getUserName() || "",
     to_Ken: '',
     roles: [],
-    buttonPermission:[]
+    buttonPermission: []
 
 }
 const getters = {
@@ -15,6 +15,7 @@ const getters = {
     roles: state => {
         return state.roles;
     },
+    buttonPermission: state => state.buttonPermission
     // access_level: state => state.access_level
 }
 
@@ -42,9 +43,8 @@ const mutations = {
     REMOVE_ROLES(state) {
         state.roles = [];
     },
-    SET_BUTTON(state,value){
+    SET_BUTTON(state, value) {
         state.buttonPermission = value;
-        console.log(state.buttonPermission );
     }
     // setAccess_level(state, value) {
     //     sessionStorage.setItem("access_level", value)
@@ -54,7 +54,6 @@ const mutations = {
 }
 const actions = {
     login({ commit }, requestData) {
-
         // console.log(content)
         return new Promise((resolve, reject) => {
             Login(requestData).then(response => {
@@ -64,9 +63,10 @@ const actions = {
                 commit("SET_TOKEN", data.token);
                 // commit("setAccess_level", resonse.data);
 
-                setUserName(data.username)
-                setToken(data.token)
 
+                setToken(data.token)
+                setUserName(data.username)
+                // console.log(data.token);
                 resolve(response);
             }).catch(error => {
 
