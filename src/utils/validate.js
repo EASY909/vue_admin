@@ -37,3 +37,21 @@ export function timestampToTime(timestamp) {
     let second = now.getSeconds();
     return year + "-" + month + "-" + date + "   " + hour + ":" + minute + ":" + second;
 }
+
+export function debounce(fn, delay) {
+
+    let timer = null;
+ 
+    return function (...args) {
+        console.log(this);
+        let _self = this;
+        if (timer) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(function () {
+    
+            timer = null;
+            fn.apply(_self, args);
+        }, delay);
+    };
+}

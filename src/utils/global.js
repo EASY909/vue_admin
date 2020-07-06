@@ -11,13 +11,23 @@ export default {
                 center: true
             })
                 .then(() => {
-                    params.fn && params.fn()
-                    // this.$message({
-                    //     type: "success",
-                    //     message: "删除成功!"
-                    // });
+                    // console.log(params.data);
+                    if (params.data) {
+                        params.fn && params.fn(params.data)
+                    } else {
+                        params.fn && params.fn()
+                    }
+
+                    // if (params.data) {
+                    //     params.fn && params.fn(data)
+
+                    // } else {
+                    //     params.fn && params.fn()
+                    //     console.log(params.data);
+                    // }
                 })
                 .catch(() => {
+
                     this.$message({
                         type: "info",
                         message: "已取消删除"
