@@ -1,6 +1,7 @@
 const path = require('path');
 module.exports = {
     // 基本路径
+    
     publicPath: process.env.NODE_ENV === 'production' ? '' : '/vue_admin',
     // 输出文件目录
     outputDir: process.env.NODE_ENV === 'production' ? 'build' : 'devdist',
